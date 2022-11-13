@@ -1,0 +1,6 @@
+site_name: Arcon SoC Demo
+site_description: Demo purpose
+theme: 
+  name: windmill
+markdown_extensions:
+  - smarty

@@ -1,0 +1,50 @@
+# Starter pipeline# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    exclude:
+    - .sentinel/*
+    - SentinelContent
+    include:
+    - PageContent
+
+pool:
+  vmImage: 'ubuntu-latest'
+strategy:
+  matrix:
+    Python36:
+      python.version: '3.6'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '$(python.version)'
+  displayName: 'Use Python $(python.version)'
+
+- script: |
+    python -m pip install --upgrade pip
+  displayName: 'Install dependencies'
+
+- script: |
+    python -m pip install mkdocs
+    python -m pip install mkdocs-windmill
+  displayName: 'Install MKDocs and theme'
+
+- script: |
+    cd PageContent
+    python -m mkdocs build
+  displayName: 'Build site with MKDocs'
+
+- task: CopyFiles@2
+  inputs:
+    sourceFolder: PageContent/site
+    targetFolder: $(Build.ArtifactStagingDirectory)
+  displayName: 'Copy Files to Staging folder'
+
+- publish: $(Build.ArtifactStagingDirectory)
+  artifact: WebApp
